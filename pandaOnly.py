@@ -87,6 +87,19 @@ def getKNNObject(refresh = False, size = -1):
         with open(homeDir + 'bildstein_knnobj.pkl', 'rb') as input:
             return pickle.load(input)
 
+def eigenvaluesToFeatures(e):
+    # Weinmann ch. 2.2
+    e1 = e[0]
+    e2 = e[1]
+    e3 = e[2]
+    linearity = (e1-e2)/e1
+    planarity = (e2-e3)/e1
+    scattering = e3/e1
+    omnivariance = (e1*e2*e3)**0.33
+    anisotropy = (e1-e3)/e1
+    eigenentropy = entropy(e)
+    changeOfCurvature = e3 / (e1+e2+e3)
+    return linearity, planarity, scattering, omnivariance, anisotropy, eigenentropy, changeOfCurvature
 
 def mapFunction(iterator):
     partitionElements = list(iterator)
@@ -97,11 +110,16 @@ def mapFunction(iterator):
     # print "ret_val = " + str(ret_val)
 
     for list_of_ids in ret_val:
+        # TODO
         # 1. get the real point of the indices
-        # 2. get PCA of the real points
+        # 2. Find neigh size for which entropy is minimum
+        # 2.1 For each neigh size, get PCA of the real points
+        # 2.2 Compute entropy after PCA
+        # 2.3 Update min
+
         pca = decomposition.PCA()
         eignvalues = pca.fit([numpyData[id] for id in list_of_ids]).explained_variance_ratio_
-        yield eignvalues, entropy(eignvalues)
+        yield eigenvaluesToFeatures(eignvalues)
 
 
     #return ret_val # TODO: vezi ce contine ret_val, si in loc sa returnezi asa, dai cu yield
