@@ -39,6 +39,7 @@ def deep_getsizeof(o, ids):
 from pyspark import SparkConf, SparkContext
 from sklearn.neighbors import NearestNeighbors
 from sklearn import decomposition
+from scipy.stats import entropy
 
 import pandas as pd
 import numpy as np
@@ -99,7 +100,8 @@ def mapFunction(iterator):
         # 1. get the real point of the indices
         # 2. get PCA of the real points
         pca = decomposition.PCA()
-        yield pca.fit([numpyData[id] for id in list_of_ids]).explained_variance_ratio_
+        eignvalues = pca.fit([numpyData[id] for id in list_of_ids]).explained_variance_ratio_
+        yield eignvalues, entropy(eignvalues)
 
 
     #return ret_val # TODO: vezi ce contine ret_val, si in loc sa returnezi asa, dai cu yield
